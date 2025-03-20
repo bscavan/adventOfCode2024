@@ -1,4 +1,4 @@
-package com.cavanaugh;
+package com.cavanaugh.day_01;
 
 import java.io.File;
 import java.io.IOException;

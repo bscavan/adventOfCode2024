@@ -1,4 +1,4 @@
-package com.cavanaugh;
+package com.cavanaugh.day_01;
 
 import java.util.Collections;
 import java.util.HashMap;

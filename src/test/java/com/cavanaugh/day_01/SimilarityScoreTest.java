@@ -1,4 +1,4 @@
-package com.cavanaugh;
+package com.cavanaugh.day_01;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
