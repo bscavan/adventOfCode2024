@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * Hello world!
- */
 public class App {
     public static void main(String[] args) {
         if(args.length <= 0) {
@@ -50,6 +47,8 @@ public class App {
             ListComparison comparator = new ListComparison(leftList, rightList);
             comparator.compareLists();
             System.out.println("The difference between the lists is: " + comparator.getDifferenceCount());
+            comparator.calculateSimilarityScore();
+            System.out.println("The similarity score for the lists is: " + comparator.getSimilarityScore());
         } catch(IOException ioException) {
             // TODO: Slap the user's wrist for this one.
             System.err.println("Failed to open and parse the file:" + fileName);

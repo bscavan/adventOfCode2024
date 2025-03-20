@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ListComparisonTest {
+public class SimilarityScoreTest {
     private List<Integer> leftList;
     private List<Integer> rightList;
 
@@ -35,9 +35,9 @@ public class ListComparisonTest {
      * Rigorous Test :-)
      */
     @Test
-    public void shouldAnswerWithTrue() {
+    public void shouldAnswerWithThirtyOne() {
         ListComparison comparator = new ListComparison(leftList, rightList);
-        comparator.compareLists();
-        assertEquals(11, comparator.getDifferenceCount());
+        comparator.calculateSimilarityScore();
+        assertEquals(31, comparator.getSimilarityScore());
     }
 }
