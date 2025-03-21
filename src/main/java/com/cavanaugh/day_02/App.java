@@ -23,8 +23,9 @@ public class App {
                 lines.add(myReader.nextLine());
             }
 
+            ReactorLevelChecker reactorLevelChecker = new ReactorLevelChecker();
             List<List<Integer>> output = ReactorLevelChecker.convertTextToReactorLevels(lines.toArray(new String[lines.size()]));
-            int safeLevelsFound = ReactorLevelChecker.countSafeLevels(output);
+            int safeLevelsFound = reactorLevelChecker.countSafeLevels(output);
             System.out.println("Found [" + safeLevelsFound + "] safe levels out of a total [" + output.size()+ "] levels.");
         } catch(IOException ioException) {
             // TODO: Slap the user's wrist for this one.

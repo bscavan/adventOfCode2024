@@ -101,16 +101,110 @@ public class ReactorLevelCheckerTest {
 
     @Test
     public void isLevelSafeTest() {
-        assertTrue(ReactorLevelChecker.isLevelSafe(levelList.get(0)));
-        assertFalse(ReactorLevelChecker.isLevelSafe(levelList.get(1)));
-        assertFalse(ReactorLevelChecker.isLevelSafe(levelList.get(2)));
-        assertFalse(ReactorLevelChecker.isLevelSafe(levelList.get(3)));
-        assertFalse(ReactorLevelChecker.isLevelSafe(levelList.get(4)));
-        assertTrue(ReactorLevelChecker.isLevelSafe(levelList.get(5)));
+        ReactorLevelChecker reactorLevelChecker = new ReactorLevelChecker();
+        assertTrue(reactorLevelChecker.isLevelSafe(levelList.get(0)));
+        assertFalse(reactorLevelChecker.isLevelSafe(levelList.get(1)));
+        assertFalse(reactorLevelChecker.isLevelSafe(levelList.get(2)));
+        assertFalse(reactorLevelChecker.isLevelSafe(levelList.get(3)));
+        assertFalse(reactorLevelChecker.isLevelSafe(levelList.get(4)));
+        assertTrue(reactorLevelChecker.isLevelSafe(levelList.get(5)));
     }
 
     @Test
-    public void countSafeLevelsTest() {
-        assertEquals(2, ReactorLevelChecker.countSafeLevels(levelList));
+    public void countSafeLevelsUndampenedTest() {
+        ReactorLevelChecker reactorLevelChecker = new ReactorLevelChecker();
+        reactorLevelChecker.setDampenerEngaged(false);
+        assertEquals(2, reactorLevelChecker.countSafeLevels(levelList));
+    }
+
+    @Test
+    public void helper() {
+        List<Integer> input = new ArrayList<>();
+        input.add(1);
+        input.add(2);
+        input.add(7);
+        input.add(8);
+        input.add(9);
+
+        ReactorLevelChecker reactorLevelChecker = new ReactorLevelChecker();
+        reactorLevelChecker.setDampenerEngaged(true);
+        assertFalse(reactorLevelChecker.isLevelSafe(input));
+    }
+
+    @Test
+    public void countSafeLevelsDampenedTest() {
+        ReactorLevelChecker reactorLevelChecker = new ReactorLevelChecker();
+        reactorLevelChecker.setDampenerEngaged(true);
+        assertEquals(4, reactorLevelChecker.countSafeLevels(levelList));
+    }
+
+    @Test
+    public void simpleGenerateDampenedLevelsListsTest() {
+        List<Integer> input = new ArrayList<>();
+        input.add(1);
+        input.add(2);
+        List<List<Integer>> output = ReactorLevelChecker.generateDampenedLevelsLists(input);
+
+        // Assert exactly two lists were generated.
+        assertEquals(2, output.size());
+
+        // Assert the first list has exactly one element.
+        assertEquals(1, output.get(0).size());
+        // Assert the first element in the first list equals 2.
+        assertEquals(2, output.get(0).get(0));
+
+        // Assert the second list has exactly one element.
+        assertEquals(1, output.get(1).size());
+        // Assert the first element in the second list equals 1.
+        assertEquals(1, output.get(1).get(0));
+    }
+
+    @Test
+    public void complexGenerateDampenedLevelsListsTest() {
+        List<Integer> input = new ArrayList<>();
+        input.add(1);
+        input.add(2);
+        input.add(3);
+        input.add(4);
+        List<List<Integer>> output = ReactorLevelChecker.generateDampenedLevelsLists(input);
+
+        // Assert exactly four lists were generated.
+        assertEquals(4, output.size());
+
+        // Assert the first list has exactly three elements.
+        assertEquals(3, output.get(0).size());
+        // Assert the first element in the first list equals 2.
+        assertEquals(2, output.get(0).get(0));
+        // Assert the second element in the first list equals 3.
+        assertEquals(3, output.get(0).get(1));
+        // Assert the third element in the first list equals 4.
+        assertEquals(4, output.get(0).get(2));
+
+        // Assert the second list has exactly three elements.
+        assertEquals(3, output.get(1).size());
+        // Assert the first element in the second list equals 1.
+        assertEquals(1, output.get(1).get(0));
+        // Assert the second element in the second list equals 3.
+        assertEquals(3, output.get(1).get(1));
+        // Assert the third element in the second list equals 4.
+        assertEquals(4, output.get(1).get(2));
+
+        // Assert the third list has exactly three elemenst.
+        assertEquals(3, output.get(2).size());
+        // Assert the first element in the third list equals 1.
+        assertEquals(1, output.get(2).get(0));
+        // Assert the second element in the third list equals 2.
+        assertEquals(2, output.get(2).get(1));
+        // Assert the third element in the third list equals 4.
+        assertEquals(4, output.get(2).get(2));
+
+        // Assert the fourth list has exactly three elements.
+        assertEquals(3, output.get(3).size());
+        // Assert the first element in the fourth list equals 1.
+        assertEquals(1, output.get(3).get(0));
+        // Assert the second element in the fourth list equals 2.
+        assertEquals(2, output.get(3).get(1));
+        // Assert the third element in the fourth list equals 3.
+        assertEquals(3, output.get(3).get(2));
     }
 }
