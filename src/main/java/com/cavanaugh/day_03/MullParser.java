@@ -9,7 +9,10 @@ import java.util.AbstractMap.SimpleEntry;
 
 public class MullParser {
     public static final String MULL_PATTERN = "mul\\((\\d\\d?\\d?),(\\d\\d?\\d?)\\)";
+    public static final String DISABLE_FLAG = "don't()";
+    public static final String ENABLE_FLAG = "do()";
     private List<String> inputValues;
+    private boolean preprocessInput = false;
     
     public MullParser() {
         inputValues = new ArrayList<>();
@@ -24,11 +27,39 @@ public class MullParser {
         inputValues = input;
     }
 
-    public static List<Entry<Integer, Integer>> parseMullText(String inputText) {
+    public void setPreprocessInput(boolean preprocessInput) {
+        this.preprocessInput = preprocessInput;
+    }
+
+    public String preprocessText(String inputText) {
+        String[] disassembledInput = inputText.split(DISABLE_FLAG);
+        String onlyEnabledInput = disassembledInput[0];
+
+        // Skip the first element because it was already included.
+        for(int index = 1; index < disassembledInput.length; index++) {
+            String currentText = disassembledInput[index];
+            int resumeIndex = currentText.indexOf(ENABLE_FLAG);
+
+            if(resumeIndex > 0) {
+                // Append everything after the enable command begins to onlyEnabledInput
+                onlyEnabledInput = onlyEnabledInput + currentText.substring(resumeIndex);
+            }
+        }
+        
+        return onlyEnabledInput;
+    }
+
+    public List<Entry<Integer, Integer>> parseMullText(String inputText) {
+        String inputToUse = inputText;
+
+        if(preprocessInput) {
+            inputToUse = preprocessText(inputText);
+        }
+
         List<Entry<Integer, Integer>> valuesToMultiply = new ArrayList<>();
 
         Pattern pattern = Pattern.compile(MULL_PATTERN);
-        Matcher matcher = pattern.matcher(inputText);
+        Matcher matcher = pattern.matcher(inputToUse);
 
         while(matcher.find()) {
             try {
@@ -44,11 +75,14 @@ public class MullParser {
 
     public int calculateProduct() {
         int runningTotal = 0;
+        StringBuilder builder = new StringBuilder();
 
         for(String currentInput: inputValues) {
-            for(Entry<Integer, Integer> current: parseMullText(currentInput)) {
-                runningTotal = runningTotal + current.getKey() * current.getValue();
-            }
+            builder.append(currentInput);
+        }
+
+        for(Entry<Integer, Integer> current: parseMullText(builder.toString())) {
+            runningTotal = runningTotal + current.getKey() * current.getValue();
         }
 
         return runningTotal;
