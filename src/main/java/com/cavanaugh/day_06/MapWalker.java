@@ -10,18 +10,19 @@ public class MapWalker {
     private static final Map<String, GuardCharacter> GUARD_CHARACTERS;
     static {
         GUARD_CHARACTERS = new HashMap<>();
-        GUARD_CHARACTERS.put("^", new GuardCharacter("^", ">", new SimpleEntry<>(-1, 0)));
-        GUARD_CHARACTERS.put(">", new GuardCharacter(">", "v", new SimpleEntry<>(0, 1)));
-        GUARD_CHARACTERS.put("v", new GuardCharacter("v", "<", new SimpleEntry<>(1, 0)));
-        GUARD_CHARACTERS.put("<", new GuardCharacter("<", "^", new SimpleEntry<>(0, -1)));
+        GUARD_CHARACTERS.put(Direction.NORTH.label, new GuardCharacter(Direction.NORTH.label, Direction.EAST, new SimpleEntry<>(-1, 0)));
+        GUARD_CHARACTERS.put(Direction.EAST.label, new GuardCharacter(Direction.EAST.label, Direction.SOUTH, new SimpleEntry<>(0, 1)));
+        GUARD_CHARACTERS.put(Direction.SOUTH.label, new GuardCharacter(Direction.SOUTH.label, Direction.WEST, new SimpleEntry<>(1, 0)));
+        GUARD_CHARACTERS.put(Direction.WEST.label, new GuardCharacter(Direction.WEST.label, Direction.NORTH, new SimpleEntry<>(0, -1)));
     }
 
     private static final String WALL_CHARACTER = "#";
     private static final String MARKED_SPACE_CHARACTER = "X";
     private List<List<String>> map;
     private List<SimpleEntry<Integer, Integer>> walls;
-    private List<SimpleEntry<Integer, Integer>> guards;
+    private List<Guard> guards;
     private int tickCount = 0;
+    private int hardTickLimit = -1;
 
     public MapWalker() {
         map = new ArrayList<>();
@@ -45,12 +46,16 @@ public class MapWalker {
         return walls;
     }
 
-    public List<SimpleEntry<Integer, Integer>> getGuards() {
+    public List<Guard> getGuards() {
         return guards;
     }
 
     public int getTickCount() {
         return tickCount;
+    }
+
+    public void setHardTickLimit(int hardTickLimit) {
+        this.hardTickLimit = hardTickLimit;
     }
 
     private void parseInput(String input) {
@@ -76,7 +81,8 @@ public class MapWalker {
                 if(WALL_CHARACTER.equals(currentCharacter)) {
                     walls.add(new SimpleEntry<>(outerIndex, innerIndex));
                 } else if (GUARD_CHARACTERS.keySet().contains(currentCharacter)) {
-                    guards.add(new SimpleEntry<>(outerIndex, innerIndex));
+                    Direction currentDirection = Direction.getDirection(currentCharacter);
+                    guards.add(new Guard(new SimpleEntry<>(outerIndex, innerIndex), currentDirection, new ArrayList<>()));
                 }
             }
 
@@ -85,19 +91,22 @@ public class MapWalker {
     }
 
     public void advanceUntilDone() {
-        while(guards.isEmpty() == false) {
+        while(guards.isEmpty() == false
+        && (hardTickLimit < 0
+        || tickCount < hardTickLimit)) {
             updateTick();
         }
     }
 
     public void updateTick() {
-        List<SimpleEntry<Integer, Integer>> updatedGuardsList = new ArrayList<>();
+        // List<SimpleEntry<Integer, Integer>> updatedGuardsList = new ArrayList<>();
 
         for(int guardIndex = 0; guardIndex < guards.size(); guardIndex++) {
-            SimpleEntry<Integer, Integer> currentGuard = guards.get(guardIndex);
+            Guard currentGuard = guards.get(guardIndex);
+            SimpleEntry<Integer, Integer> currentCoordinates = currentGuard.getCoordinates();
 
             // Get the current character, using the coordinates of currentGuard.
-            String currentGuardCharacter = map.get(currentGuard.getKey()).get(currentGuard.getValue());
+            String currentGuardCharacter = currentGuard.getCurrentDirection().label;
 
             // adjust the current coordinates using the offsets in GUARD_CHARACTERS
             GuardCharacter objectNameGoesHere = GUARD_CHARACTERS.get(currentGuardCharacter);
@@ -107,8 +116,8 @@ public class MapWalker {
                 continue;
             }
             SimpleEntry<Integer, Integer> offsets = objectNameGoesHere.OFFSETS;
-            SimpleEntry<Integer, Integer> newPosition = new SimpleEntry<>(currentGuard.getKey() + offsets.getKey(),
-                                                                        currentGuard.getValue() + offsets.getValue());
+            SimpleEntry<Integer, Integer> newPosition = new SimpleEntry<>(currentCoordinates.getKey() + offsets.getKey(),
+                                                                        currentCoordinates.getValue() + offsets.getValue());
 
             // If the new position is inside the bounds of the map...
             if(newPosition.getKey() >= 0 && newPosition.getKey() < map.size()
@@ -116,28 +125,30 @@ public class MapWalker {
                 String charAtNewPosition = map.get(newPosition.getKey()).get(newPosition.getValue());
                 if(WALL_CHARACTER.equals(charAtNewPosition)) {
                     // Keep this guard with the old position.
-                    updatedGuardsList.add(currentGuard);
+                    currentGuard.addNewTurn(new TurnData(currentGuard.getCoordinates(), currentGuard.getCurrentDirection()));
+                    // updatedGuardsList.add(new Guard(currentCoordinates, cu));
 
                     // Update the map with the new character, rotated at a 90 degree angle!
-                    map.get(currentGuard.getKey()).set(currentGuard.getValue(),
-                        GUARD_CHARACTERS.get(currentGuardCharacter).NEXT_CHARACTER);
+                    map.get(currentCoordinates.getKey()).set(currentCoordinates.getValue(),
+                        GUARD_CHARACTERS.get(currentGuardCharacter).NEXT_DIRECTION.label);
                 } else {
                     // Keep this guard with the new positioning.
-                    updatedGuardsList.add(newPosition);
+                    currentGuard.setCoordinates(newPosition);
+                    // updatedGuardsList.add(newPosition);
 
                     // Update the old position on the map with the empty space character
-                    map.get(currentGuard.getKey()).set(currentGuard.getValue(), MARKED_SPACE_CHARACTER);
+                    map.get(currentCoordinates.getKey()).set(currentCoordinates.getValue(), MARKED_SPACE_CHARACTER);
 
                     // Update the new position on the map with the guard's character!
                     map.get(newPosition.getKey()).set(newPosition.getValue(), currentGuardCharacter);
                 }
             } else {
                 // Update the old position on the map with the empty space character
-                map.get(currentGuard.getKey()).set(currentGuard.getValue(), MARKED_SPACE_CHARACTER);
+                map.get(currentCoordinates.getKey()).set(currentCoordinates.getValue(), MARKED_SPACE_CHARACTER);
             }
         }
 
-        guards = updatedGuardsList;
+        // guards = updatedGuardsList;
         tickCount++;
     }
 

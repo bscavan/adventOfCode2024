@@ -1,6 +1,8 @@
 package com.cavanaugh.day_06;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
@@ -66,8 +68,8 @@ public class MapWalkerTest {
 
         assertEquals(1, mapWalker.getGuards().size());
         // Assert the Guard is in the correct place.
-        assertEquals(6, mapWalker.getGuards().get(0).getKey());
-        assertEquals(4, mapWalker.getGuards().get(0).getValue());
+        assertEquals(6, mapWalker.getGuards().get(0).getCoordinates().getKey());
+        assertEquals(4, mapWalker.getGuards().get(0).getCoordinates().getValue());
     }
 
     @Test
@@ -76,48 +78,48 @@ public class MapWalkerTest {
 
         assertEquals(1, mapWalker.getGuards().size());
         // Assert the Guard is in the correct place.
-        assertEquals(6, mapWalker.getGuards().get(0).getKey());
-        assertEquals(4, mapWalker.getGuards().get(0).getValue());
+        assertEquals(6, mapWalker.getGuards().get(0).getCoordinates().getKey());
+        assertEquals(4, mapWalker.getGuards().get(0).getCoordinates().getValue());
 
         mapWalker.updateTick();
 
         // Assert the Guard has moved forward one space.
-        assertEquals(5, mapWalker.getGuards().get(0).getKey());
-        assertEquals(4, mapWalker.getGuards().get(0).getValue());
+        assertEquals(5, mapWalker.getGuards().get(0).getCoordinates().getKey());
+        assertEquals(4, mapWalker.getGuards().get(0).getCoordinates().getValue());
 
         mapWalker.updateTick();
 
         // Assert the Guard has moved forward one space.
-        assertEquals(4, mapWalker.getGuards().get(0).getKey());
-        assertEquals(4, mapWalker.getGuards().get(0).getValue());
+        assertEquals(4, mapWalker.getGuards().get(0).getCoordinates().getKey());
+        assertEquals(4, mapWalker.getGuards().get(0).getCoordinates().getValue());
 
         mapWalker.updateTick();
 
         // Assert the Guard has moved forward one space.
-        assertEquals(3, mapWalker.getGuards().get(0).getKey());
-        assertEquals(4, mapWalker.getGuards().get(0).getValue());
+        assertEquals(3, mapWalker.getGuards().get(0).getCoordinates().getKey());
+        assertEquals(4, mapWalker.getGuards().get(0).getCoordinates().getValue());
 
         mapWalker.updateTick();
 
         // Assert the Guard has moved forward one space.
-        assertEquals(2, mapWalker.getGuards().get(0).getKey());
-        assertEquals(4, mapWalker.getGuards().get(0).getValue());
+        assertEquals(2, mapWalker.getGuards().get(0).getCoordinates().getKey());
+        assertEquals(4, mapWalker.getGuards().get(0).getCoordinates().getValue());
 
         mapWalker.updateTick();
 
         // Assert the Guard has moved forward one space.
-        assertEquals(1, mapWalker.getGuards().get(0).getKey());
-        assertEquals(4, mapWalker.getGuards().get(0).getValue());
+        assertEquals(1, mapWalker.getGuards().get(0).getCoordinates().getKey());
+        assertEquals(4, mapWalker.getGuards().get(0).getCoordinates().getValue());
 
         mapWalker.updateTick();
 
         // Assert the Guard has NOT moved forward.
-        assertEquals(1, mapWalker.getGuards().get(0).getKey());
-        assertEquals(4, mapWalker.getGuards().get(0).getValue());
+        assertEquals(1, mapWalker.getGuards().get(0).getCoordinates().getKey());
+        assertEquals(4, mapWalker.getGuards().get(0).getCoordinates().getValue());
 
         // Assert that the guard has turned 90 degrees
         List<List<String>> parsedInput = mapWalker.getMap();
-        SimpleEntry<Integer, Integer> guard = mapWalker.getGuards().get(0);
+        SimpleEntry<Integer, Integer> guard = mapWalker.getGuards().get(0).getCoordinates();
         String guardCharacter = parsedInput.get(guard.getKey()).get(guard.getValue());
         assertEquals(">", guardCharacter);
     }
@@ -125,7 +127,27 @@ public class MapWalkerTest {
     @Test
     public void advanceUntilDoneTest() {
         MapWalker mapWalker = new MapWalker(rawMapData);
+        mapWalker.setHardTickLimit(55);
         mapWalker.advanceUntilDone();
         assertEquals(41, mapWalker.countMarkedSpaces());
+    }
+
+    @Test
+    public void isInLoopTest() {
+        String boxMap =
+            "###" + System.lineSeparator()
+            + "#^#" + System.lineSeparator()
+            + "###";
+        MapWalker mapWalker = new MapWalker(boxMap);
+        assertEquals(1, mapWalker.getGuards().size());
+
+        mapWalker.updateTick();
+        mapWalker.updateTick();
+        mapWalker.updateTick();
+        mapWalker.updateTick();
+        mapWalker.updateTick();
+
+        // TODO: Assert that the first guard is caught in a loop!
+        assertTrue(mapWalker.getGuards().get(0).isCaughtInLoop());
     }
 }
